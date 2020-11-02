@@ -78,12 +78,12 @@ lazy val core = libraryProject("core")
     buildInfoPackage := organization.value,
     libraryDependencies ++= Seq(
       cats,
-      catsEffect,
-      fs2Io,
-      log4s,
-      parboiled,
-      vault,
-    ).map(_.withDottyCompat(scalaVersion.value)),
+      catsEffect.withDottyCompat(scalaVersion.value),
+      fs2Io.withDottyCompat(scalaVersion.value),
+      log4s.withDottyCompat(scalaVersion.value),
+      parboiled.withDottyCompat(scalaVersion.value),
+      vault.withDottyCompat(scalaVersion.value)
+    ),
     libraryDependencies ++= {
       if (isDotty.value) Nil
       else Seq(scalaReflect(scalaVersion.value) % Provided),
@@ -95,8 +95,8 @@ lazy val laws = libraryProject("laws")
   .settings(
     description := "Instances and laws for testing http4s code",
     libraryDependencies ++= Seq(
-      catsEffectLaws,
-    ).map(_.withDottyCompat(scalaVersion.value)),
+      catsEffectLaws.withDottyCompat(scalaVersion.value),
+    )
   )
   .dependsOn(core)
 
@@ -104,9 +104,8 @@ lazy val testing = libraryProject("testing")
   .settings(
     description := "Instances and laws for testing http4s code",
     libraryDependencies ++= Seq(
-      catsEffectLaws,
-      specs2Matcher,
-    ).map(_.withDottyCompat(scalaVersion.value)),
+      specs2Matcher.withDottyCompat(scalaVersion.value),
+    )
   )
   .dependsOn(laws)
 
@@ -140,7 +139,7 @@ lazy val prometheusMetrics = libraryProject("prometheus-metrics")
       prometheusCommon,
       prometheusHotspot,
       prometheusClient
-    ).map(_.withDottyCompat(scalaVersion.value)),
+    )
   )
   .dependsOn(
     core % "compile->compile",
@@ -154,7 +153,7 @@ lazy val client = libraryProject("client")
   .enablePlugins(SilencerPlugin)
   .settings(
     description := "Base library for building http4s clients",
-    libraryDependencies += jettyServlet % Test withDottyCompat(scalaVersion.value)
+    libraryDependencies += jettyServlet % Test
   )
   .dependsOn(
     core,
@@ -169,7 +168,8 @@ lazy val dropwizardMetrics = libraryProject("dropwizard-metrics")
     libraryDependencies ++= Seq(
       dropwizardMetricsCore,
       dropwizardMetricsJson
-    ).map(_.withDottyCompat(scalaVersion.value)))
+    )
+  )
   .dependsOn(
     core % "compile->compile",
     testing % "test->test",
@@ -182,7 +182,10 @@ lazy val emberCore = libraryProject("ember-core")
   .settings(
     description := "Base library for ember http4s clients and servers",
     unusedCompileDependenciesFilter -= moduleFilter("io.chrisdavenport", "log4cats-core"),
-    libraryDependencies ++= Seq(log4catsCore, log4catsTesting % Test).map(_.withDottyCompat(scalaVersion.value)),
+    libraryDependencies ++= Seq(
+      log4catsCore.withDottyCompat(scalaVersion.value),
+      (log4catsTesting % Test).withDottyCompat(scalaVersion.value)
+    ),
     mimaBinaryIssueFilters ++= Seq(
       ProblemFilters.exclude[DirectMissingMethodProblem]("org.http4s.ember.core.ChunkedEncoding.decode"),
       ProblemFilters.exclude[DirectMissingMethodProblem]("org.http4s.ember.core.ChunkedEncoding.decode"),
@@ -208,7 +211,9 @@ lazy val emberCore = libraryProject("ember-core")
 lazy val emberServer = libraryProject("ember-server")
   .settings(
     description := "ember implementation for http4s servers",
-    libraryDependencies ++= Seq(log4catsSlf4j).map(_.withDottyCompat(scalaVersion.value)),
+    libraryDependencies ++= Seq(
+      log4catsSlf4j.withDottyCompat(scalaVersion.value)
+    ),
     mimaBinaryIssueFilters ++= Seq(
       ProblemFilters.exclude[DirectMissingMethodProblem]("org.http4s.ember.server.internal.ServerHelpers.server"),
       ProblemFilters.exclude[IncompatibleResultTypeProblem]("org.http4s.ember.server.internal.ServerHelpers.server$default$12"),
@@ -220,7 +225,10 @@ lazy val emberServer = libraryProject("ember-server")
 lazy val emberClient = libraryProject("ember-client")
   .settings(
     description := "ember implementation for http4s clients",
-    libraryDependencies ++= Seq(keypool, log4catsSlf4j).map(_.withDottyCompat(scalaVersion.value)),
+    libraryDependencies ++= Seq(
+      keypool.withDottyCompat(scalaVersion.value),
+      log4catsSlf4j.withDottyCompat(scalaVersion.value)
+    ),
     mimaBinaryIssueFilters ++= Seq(
       ProblemFilters.exclude[DirectMissingMethodProblem]("org.http4s.ember.client.internal.ClientHelpers.request"),
       ProblemFilters.exclude[IncompatibleResultTypeProblem]("org.http4s.ember.client.internal.ClientHelpers.request"),
@@ -253,7 +261,7 @@ lazy val asyncHttpClient = libraryProject("async-http-client")
     description := "async http client implementation for http4s clients",
     libraryDependencies ++= Seq(
       Http4sPlugin.asyncHttpClient,
-      fs2ReactiveStreams,
+      fs2ReactiveStreams.withDottyCompat(scalaVersion.value),
       // We've pinned AHC due to binary compatibility, but the
       // underlying Netty has a vulnerability flaw, so forcibly
       // upgrade those.
@@ -264,7 +272,7 @@ lazy val asyncHttpClient = libraryProject("async-http-client")
       nettyTransport % Runtime,
       nettyHandler % Runtime,
       nettyResolverDns % Runtime
-    ).map(_.withDottyCompat(scalaVersion.value))
+    )
   )
   .dependsOn(core, testing % "test->test", client % "compile;test->test")
 
@@ -336,7 +344,7 @@ lazy val argonaut = libraryProject("argonaut")
     description := "Provides Argonaut codecs for http4s",
     libraryDependencies ++= Seq(
       Http4sPlugin.argonaut
-    ).map(_.withDottyCompat(scalaVersion.value))
+    )
   )
   .dependsOn(core, testing % "test->test", jawn % "compile;test->test")
 
@@ -344,8 +352,8 @@ lazy val boopickle = libraryProject("boopickle")
   .settings(
     description := "Provides Boopickle codecs for http4s",
     libraryDependencies ++= Seq(
-      Http4sPlugin.boopickle
-    ).map(_.withDottyCompat(scalaVersion.value)),
+      Http4sPlugin.boopickle.withDottyCompat(scalaVersion.value)
+    )
   )
   .dependsOn(core, testing % "test->test")
 
@@ -353,9 +361,9 @@ lazy val circe = libraryProject("circe")
   .settings(
     description := "Provides Circe codecs for http4s",
     libraryDependencies ++= Seq(
-      circeJawn,
-      circeTesting % Test
-    ).map(_.withDottyCompat(scalaVersion.value))
+      circeJawn.withDottyCompat(scalaVersion.value),
+      (circeTesting % Test).withDottyCompat(scalaVersion.value)
+    )
   )
   .dependsOn(core, testing % "test->test", jawn % "compile;test->test")
 
@@ -363,9 +371,9 @@ lazy val json4s = libraryProject("json4s")
   .settings(
     description := "Base library for json4s codecs for http4s",
     libraryDependencies ++= Seq(
-      jawnJson4s,
-      json4sCore
-    ).map(_.withDottyCompat(scalaVersion.value)),
+      jawnJson4s.withDottyCompat(scalaVersion.value),
+      json4sCore.withDottyCompat(scalaVersion.value)
+    )
   )
   .dependsOn(jawn % "compile;test->test")
 
@@ -387,9 +395,9 @@ lazy val playJson = libraryProject("play-json")
   .settings(
     description := "Provides Play json codecs for http4s",
     libraryDependencies ++= Seq(
-      jawnPlay,
-      Http4sPlugin.playJson
-    ).map(_.withDottyCompat(scalaVersion.value))
+      jawnPlay.withDottyCompat(scalaVersion.value),
+      Http4sPlugin.playJson.withDottyCompat(scalaVersion.value)
+    )
   )
   .dependsOn(jawn % "compile;test->test")
 
@@ -397,8 +405,8 @@ lazy val scalaXml = libraryProject("scala-xml")
   .settings(
     description := "Provides scala-xml codecs for http4s",
     libraryDependencies ++= Seq(
-      Http4sPlugin.scalaXml
-    ).map(_.withDottyCompat(scalaVersion.value)),
+      Http4sPlugin.scalaXml.withDottyCompat(scalaVersion.value)
+    )
   )
   .dependsOn(core, testing % "test->test")
 
@@ -518,9 +526,9 @@ lazy val examples = http4sProject("examples")
   .settings(
     description := "Common code for http4s examples",
     libraryDependencies ++= Seq(
-      circeGeneric % Runtime,
+      (circeGeneric % Runtime).withDottyCompat(scalaVersion.value),
       logbackClassic % Runtime
-    ).map(_.withDottyCompat(scalaVersion.value)),
+    )
     //TwirlKeys.templateImports := Nil
   )
   .dependsOn(server, dropwizardMetrics, theDsl, circe, scalaXml, twirl)
@@ -533,8 +541,8 @@ lazy val examplesBlaze = exampleProject("examples-blaze")
     description := "Examples of http4s server and clients on blaze",
     fork := true,
     libraryDependencies ++= Seq(
-      circeGeneric,
-    ).map(_.withDottyCompat(scalaVersion.value)),
+      circeGeneric.withDottyCompat(scalaVersion.value),
+    )
   )
   .dependsOn(blazeServer, blazeClient)
 
@@ -702,17 +710,17 @@ lazy val commonSettings = Seq(
     "-Xlint:unchecked"
   ),
   libraryDependencies ++= Seq(
-    catsEffectTestingSpecs2,
+    catsEffectTestingSpecs2.withDottyCompat(scalaVersion.value),
     catsLaws,
     catsKernelLaws,
-    disciplineSpecs2,
+    disciplineSpecs2.withDottyCompat(scalaVersion.value),
     logbackClassic,
     scalacheck,
-    specs2Cats,
-    specs2Core,
-    specs2MatcherExtra,
-    specs2Scalacheck
-  ).map(_ % Test withDottyCompat(scalaVersion.value)),
+    specs2Cats.withDottyCompat(scalaVersion.value),
+    specs2Core.withDottyCompat(scalaVersion.value),
+    specs2MatcherExtra.withDottyCompat(scalaVersion.value),
+    specs2Scalacheck.withDottyCompat(scalaVersion.value)
+  ).map(_ % Test)
 )
 
 def initCommands(additionalImports: String*) =
