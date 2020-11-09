@@ -35,7 +35,7 @@ object Http4sPlugin extends AutoPlugin {
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
     scalaVersion := scala_213,
-    crossScalaVersions := Seq(scala_213, scala_212, "0.27.0-RC1"),
+    crossScalaVersions := Seq(scala_213, scala_212, "0.27.0-RC1", "3.0.0-M1"),
 
     http4sBuildData := {
       val dest = target.value / "hugo-data" / "build.toml"
@@ -237,7 +237,7 @@ object Http4sPlugin extends AutoPlugin {
     val asyncHttpClient = "2.10.5"
     val blaze = "0.14.13"
     val boopickle = "1.3.3"
-    val cats = "2.3.0-M1"
+    val cats = "2.3.0-M2"
     val catsEffect = "2.2.0"
     val catsEffectTesting = "0.4.1"
     val circe = "0.13.0"
