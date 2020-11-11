@@ -78,11 +78,11 @@ lazy val core = libraryProject("core")
     buildInfoPackage := organization.value,
     libraryDependencies ++= Seq(
       cats,
-      catsEffect.withDottyCompat(scalaVersion.value),
-      fs2Io.withDottyCompat(scalaVersion.value),
+      catsEffect,
+      fs2Io,
       log4s.withDottyCompat(scalaVersion.value),
       parboiled.withDottyCompat(scalaVersion.value),
-      vault.withDottyCompat(scalaVersion.value)
+      // vault.withDottyCompat(scalaVersion.value)
     ),
     libraryDependencies ++= {
       if (isDotty.value) Nil
@@ -710,16 +710,16 @@ lazy val commonSettings = Seq(
     "-Xlint:unchecked"
   ),
   libraryDependencies ++= Seq(
-    catsEffectTestingSpecs2.withDottyCompat(scalaVersion.value),
+    // catsEffectTestingSpecs2.withDottyCompat(scalaVersion.value),
     catsLaws,
     catsKernelLaws,
-    disciplineSpecs2.withDottyCompat(scalaVersion.value),
+    disciplineSpecs2,
     logbackClassic,
     scalacheck,
-    specs2Cats.withDottyCompat(scalaVersion.value),
-    specs2Core.withDottyCompat(scalaVersion.value),
-    specs2MatcherExtra.withDottyCompat(scalaVersion.value),
-    specs2Scalacheck.withDottyCompat(scalaVersion.value)
+    // specs2Cats.withDottyCompat(scalaVersion.value),
+    // specs2Core.withDottyCompat(scalaVersion.value),
+    // specs2MatcherExtra.withDottyCompat(scalaVersion.value),
+    // specs2Scalacheck.withDottyCompat(scalaVersion.value)
   ).map(_ % Test)
 )
 
