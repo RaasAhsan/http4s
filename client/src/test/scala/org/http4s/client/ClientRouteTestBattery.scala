@@ -104,6 +104,7 @@ abstract class ClientRouteTestBattery(name: String) extends Http4sSuite with Htt
   }
 
   clientFixture.test(s"$name Execute GET") { case (jetty, client) =>
+    println("Executed the GET")
     val address = jetty.addresses.head
     GetRoutes.getPaths.toList.traverse { case (path, expected) =>
       val name = address.getHostName

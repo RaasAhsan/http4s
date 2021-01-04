@@ -71,7 +71,7 @@ jobs:
         run: sbt ++${{ matrix.scala }} unusedCompileDependenciesTest
 
       - name: Run tests
-        run: sbt ++${{ matrix.scala }} test
+        run: sbt ++${{ matrix.scala }} 'blaze-client/testOnly *Http1ClientStageSuite'
 
   publish:
     name: Publish Artifacts
