@@ -279,19 +279,19 @@ sealed abstract class BlazeClientBuilder[F[_]] private (
       dispatcher = dispatcher
     ).makeClient
     Resource.make(
-      //      ConnectionManager.pool(
-      //        builder = http1,
-      //        maxTotal = maxTotalConnections,
-      //        maxWaitQueueLimit = maxWaitQueueLimit,
-      //        maxConnectionsPerRequestKey = maxConnectionsPerRequestKey,
-      //        responseHeaderTimeout = responseHeaderTimeout,
-      //        requestTimeout = requestTimeout,
-      //        executionContext = executionContext
-      //      )
-      F.delay(
-        ConnectionManager.basic(
-          builder = http1
-        ))
+      ConnectionManager.pool(
+        builder = http1,
+        maxTotal = maxTotalConnections,
+        maxWaitQueueLimit = maxWaitQueueLimit,
+        maxConnectionsPerRequestKey = maxConnectionsPerRequestKey,
+        responseHeaderTimeout = responseHeaderTimeout,
+        requestTimeout = requestTimeout,
+        executionContext = executionContext
+      )
+//      F.delay(
+//        ConnectionManager.basic(
+//          builder = http1
+//        ))
     )(_.shutdown)
   }
 }
