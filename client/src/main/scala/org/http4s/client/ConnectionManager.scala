@@ -81,6 +81,7 @@ object ConnectionManager {
       requestTimeout: Duration,
       executionContext: ExecutionContext): F[ConnectionManager[F, A]] =
     Semaphore(1).map { semaphore =>
+      println("Constructing a new PoolManager.")
       new PoolManager[F, A](
         builder,
         maxTotal,
