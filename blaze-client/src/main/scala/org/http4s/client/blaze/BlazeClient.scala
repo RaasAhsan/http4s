@@ -23,7 +23,7 @@ import cats.effect.implicits._
 import cats.syntax.all._
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeoutException
-import org.http4s.blaze.pipeline.Command
+//import org.http4s.blaze.pipeline.Command
 import org.http4s.blaze.util.TickWheelExecutor
 import org.http4s.blazecore.{IdleTimeoutStage, ResponseHeaderTimeoutStage}
 import org.log4s.getLogger
@@ -34,7 +34,7 @@ import scala.concurrent.duration._
 object BlazeClient {
   import Resource.ExitCase
 
-  private[this] val logger = getLogger
+//  private[this] val logger = getLogger
 
   private[blaze] def makeClient[F[_], A <: BlazeConnection[F]](
       manager: ConnectionManager[F, A],
@@ -50,18 +50,20 @@ object BlazeClient {
 
         // If we can't invalidate a connection, it shouldn't tank the subsequent operation,
         // but it should be noisy.
-        def invalidate(connection: A): F[Unit] =
-          manager
-            .invalidate(connection)
-            .handleError(e => logger.error(e)(s"Error invalidating connection for $key"))
+//        def invalidate(connection: A): F[Unit] =
+//          manager
+//            .invalidate(connection)
+//            .handleError(e => logger.error(e)(s"Error invalidating connection for $key"))
 
         def borrow: Resource[F, manager.NextConnection] =
-          Resource.makeCase(manager.borrow(key)) {
-            case (_, ExitCase.Succeeded) =>
-              F.unit
-            case (next, ExitCase.Errored(_) | ExitCase.Canceled) =>
-              invalidate(next.connection)
-          }
+          Resource.eval(manager.borrow(key))
+//          Resource.makeCase(manager.borrow(key)) {
+//            case (_, ExitCase.Succeeded) =>
+//              F.unit
+//            case (next, ExitCase.Errored(_) | ExitCase.Canceled) =>
+////              invalidate(next.connection)
+//              F.unit
+//          }
 
         def idleTimeoutStage(conn: A): Resource[F, Option[IdleTimeoutStage[ByteBuffer]]] =
           Resource.makeCase {
@@ -89,25 +91,26 @@ object BlazeClient {
               }
               val res = next.connection
                 .runRequest(req, idleTimeoutF)
-                .map { r =>
-                  Resource.makeCase(F.pure(r)) {
-                    case (_, ExitCase.Succeeded) =>
-                      F.delay(stageOpt.foreach(_.removeStage()))
-                        .guarantee(manager.release(next.connection))
-                    case _ =>
-                      F.delay(stageOpt.foreach(_.removeStage()))
-                        .guarantee(manager.invalidate(next.connection))
-                  }
-                }
-                .recoverWith { case Command.EOF =>
-                  invalidate(next.connection).flatMap { _ =>
-                    if (next.fresh)
-                      F.raiseError(
-                        new java.net.ConnectException(s"Failed to connect to endpoint: $key"))
-                    else
-                      loop
-                  }
-                }
+                .map(r => Resource.pure[F, Response[F]](r))
+//                .map { r =>
+//                  Resource.makeCase(F.pure(r)) {
+//                    case (_, ExitCase.Succeeded) =>
+//                      F.delay(stageOpt.foreach(_.removeStage()))
+//                        .guarantee(manager.release(next.connection))
+//                    case _ =>
+//                      F.delay(stageOpt.foreach(_.removeStage()))
+//                        .guarantee(manager.invalidate(next.connection))
+//                  }
+//                }
+//                .recoverWith { case Command.EOF =>
+//                  invalidate(next.connection).flatMap { _ =>
+//                    if (next.fresh)
+//                      F.raiseError(
+//                        new java.net.ConnectException(s"Failed to connect to endpoint: $key"))
+//                    else
+//                      loop
+//                  }
+//                }
 
               responseHeaderTimeout match {
                 case responseHeaderTimeout: FiniteDuration =>
