@@ -26,7 +26,7 @@ import java.util.concurrent.TimeoutException
 //import org.http4s.blaze.pipeline.Command
 import org.http4s.blaze.util.TickWheelExecutor
 import org.http4s.blazecore.{IdleTimeoutStage, ResponseHeaderTimeoutStage}
-import org.log4s.getLogger
+//import org.log4s.getLogger
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
@@ -91,17 +91,17 @@ object BlazeClient {
               }
               val res = next.connection
                 .runRequest(req, idleTimeoutF)
-                .map(r => Resource.pure[F, Response[F]](r))
-//                .map { r =>
-//                  Resource.makeCase(F.pure(r)) {
-//                    case (_, ExitCase.Succeeded) =>
-//                      F.delay(stageOpt.foreach(_.removeStage()))
-//                        .guarantee(manager.release(next.connection))
-//                    case _ =>
-//                      F.delay(stageOpt.foreach(_.removeStage()))
-//                        .guarantee(manager.invalidate(next.connection))
-//                  }
-//                }
+//                .map(r => Resource.pure[F, Response[F]](r))
+                .map { r =>
+                  Resource.makeCase(F.pure(r)) {
+                    case (_, ExitCase.Succeeded) =>
+                      F.delay(stageOpt.foreach(_.removeStage()))
+                        .guarantee(manager.release(next.connection))
+                    case _ =>
+                      F.delay(stageOpt.foreach(_.removeStage()))
+                        .guarantee(manager.invalidate(next.connection))
+                  }
+                }
 //                .recoverWith { case Command.EOF =>
 //                  invalidate(next.connection).flatMap { _ =>
 //                    if (next.fresh)
