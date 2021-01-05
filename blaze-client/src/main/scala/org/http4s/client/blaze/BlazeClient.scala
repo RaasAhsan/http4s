@@ -49,7 +49,7 @@ object BlazeClient {
             .map { r =>
               Resource.makeCase(F.pure(r)) {
                 case (_, ExitCase.Succeeded) =>
-                  F.unit
+                  manager.release(next.connection)
                 case _ =>
                   println(idleTimeout)
                   println(responseHeaderTimeout)

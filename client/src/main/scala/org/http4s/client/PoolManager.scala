@@ -299,9 +299,9 @@ private final class PoolManager[F[_], A <: Connection[F]](
       val key = connection.requestKey
       logger.debug(s"Recycling connection for $key: $stats")
       if (connection.isRecyclable)
-        releaseRecyclable(key, connection)
+        releaseRecyclable(key, connection) *> F.delay(println("Releasing a connection back to the pool. is recyclable"))
       else
-        releaseNonRecyclable(key, connection)
+        releaseNonRecyclable(key, connection) *> F.delay(println("Releasing a connection back to the pool. is not recyclable"))
     }
 
   private def findFirstAllowedWaiter: F[Option[Waiting]] =
