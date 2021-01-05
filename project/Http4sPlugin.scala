@@ -246,12 +246,12 @@ object Http4sPlugin extends AutoPlugin {
 
     Http4sOrgPlugin.githubActionsSettings ++ Seq(
       githubWorkflowBuild := Seq(
-        WorkflowStep
-          .Sbt(List("scalafmtCheckAll"), name = Some("Check formatting")),
-        WorkflowStep.Sbt(List("headerCheck", "test:headerCheck"), name = Some("Check headers")),
+//        WorkflowStep
+//          .Sbt(List("scalafmtCheckAll"), name = Some("Check formatting")),
+//        WorkflowStep.Sbt(List("headerCheck", "test:headerCheck"), name = Some("Check headers")),
         WorkflowStep.Sbt(List("test:compile"), name = Some("Compile")),
-        WorkflowStep.Sbt(List("mimaReportBinaryIssues"), name = Some("Check binary compatibility")),
-        WorkflowStep.Sbt(List("unusedCompileDependenciesTest"), name = Some("Check unused dependencies")),
+//        WorkflowStep.Sbt(List("mimaReportBinaryIssues"), name = Some("Check binary compatibility")),
+//        WorkflowStep.Sbt(List("unusedCompileDependenciesTest"), name = Some("Check unused dependencies")),
         WorkflowStep.Sbt(List("blaze-client/test"), name = Some("Run tests")),
         WorkflowStep.Sbt(List("blaze-client/test"), name = Some("Run tests 2")),
         WorkflowStep.Sbt(List("blaze-client/test"), name = Some("Run tests 3")),

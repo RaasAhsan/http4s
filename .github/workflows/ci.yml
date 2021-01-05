@@ -55,20 +55,8 @@ jobs:
       - name: Check that workflows are up to date
         run: sbt ++${{ matrix.scala }} githubWorkflowCheck
 
-      - name: Check formatting
-        run: sbt ++${{ matrix.scala }} scalafmtCheckAll
-
-      - name: Check headers
-        run: 'sbt ++${{ matrix.scala }} headerCheck test:headerCheck'
-
       - name: Compile
         run: 'sbt ++${{ matrix.scala }} test:compile'
-
-      - name: Check binary compatibility
-        run: sbt ++${{ matrix.scala }} mimaReportBinaryIssues
-
-      - name: Check unused dependencies
-        run: sbt ++${{ matrix.scala }} unusedCompileDependenciesTest
 
       - name: Run tests
         run: sbt ++${{ matrix.scala }} blaze-client/test
