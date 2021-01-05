@@ -56,7 +56,7 @@ object BlazeClient {
                   println(ec)
                   println(requestTimeout)
                   println(scheduler)
-                  F.unit
+                  manager.invalidate(next.connection)
               }
             }
         }
