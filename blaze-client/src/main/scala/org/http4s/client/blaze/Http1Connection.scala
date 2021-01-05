@@ -18,7 +18,7 @@ package org.http4s
 package client
 package blaze
 
-import cats.effect.kernel.{Async, Resource}
+import cats.effect.kernel.{Async, Resource, Deferred}
 import cats.effect.std.Dispatcher
 import cats.effect.implicits._
 import cats.syntax.all._
@@ -162,7 +162,7 @@ private final class Http1Connection[F[_]](
             case None => getHttpMinor(req) == 0
           }
 
-          idleTimeoutF.start.flatMap { timeoutFiber =>
+          Deferred[F, Unit].product(idleTimeoutF.start).flatMap { case (writeDone, timeoutFiber) =>
             val idleTimeoutS = timeoutFiber.joinAndEmbedNever.attempt.map {
               case Right(t) => Left(t): Either[Throwable, Unit]
               case Left(t) => Left(t): Either[Throwable, Unit]
@@ -174,11 +174,12 @@ private final class Http1Connection[F[_]](
                 case EOF => F.unit
                 case t => F.delay(logger.error(t)("Error rendering request"))
               }
+              .guarantee(writeDone.complete(()).void)
 
             val response: F[Response[F]] =
               receiveResponse(mustClose, doesntHaveBody = req.method == Method.HEAD, idleTimeoutS)
 
-            val res = writeRequest >> response
+            val res = writeRequest.start *> response <* writeDone.get
 
             F.race(res, timeoutFiber.joinAndEmbedNever).flatMap {
               case Left(r) =>
