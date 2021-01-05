@@ -45,36 +45,8 @@ object BlazeClient {
       Resource.suspend {
         val key = RequestKey.fromRequest(req)
 
-        // If we can't invalidate a connection, it shouldn't tank the subsequent operation,
-        // but it should be noisy.
-//        def invalidate(connection: A): F[Unit] =
-//          manager
-//            .invalidate(connection)
-//            .handleError(e => logger.error(e)(s"Error invalidating connection for $key"))
-
         def borrow: Resource[F, manager.NextConnection] =
           Resource.eval(manager.borrow(key))
-//          Resource.makeCase(manager.borrow(key)) {
-//            case (_, ExitCase.Succeeded) =>
-//              F.unit
-//            case (next, ExitCase.Errored(_) | ExitCase.Canceled) =>
-////              invalidate(next.connection)
-//              F.unit
-//          }
-
-//        def idleTimeoutStage(conn: A): Resource[F, Option[IdleTimeoutStage[ByteBuffer]]] =
-//          Resource.makeCase {
-//            idleTimeout match {
-//              case d: FiniteDuration =>
-//                val stage = new IdleTimeoutStage[ByteBuffer](d, scheduler, ec)
-//                F.delay(conn.spliceBefore(stage)).as(Some(stage))
-//              case _ =>
-//                F.pure(None)
-//            }
-//          } {
-//            case (_, ExitCase.Succeeded) => F.unit
-//            case (stageOpt, _) => F.delay(stageOpt.foreach(_.removeStage()))
-//          }
 
         def loop: F[Resource[F, Response[F]]] =
           borrow.use { next =>
