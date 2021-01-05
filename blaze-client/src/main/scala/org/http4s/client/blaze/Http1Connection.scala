@@ -178,7 +178,7 @@ private final class Http1Connection[F[_]](
             val response: F[Response[F]] =
               receiveResponse(mustClose, doesntHaveBody = req.method == Method.HEAD, idleTimeoutS)
 
-            val res = writeRequest.start >> response
+            val res = writeRequest >> response
 
             F.race(res, timeoutFiber.joinAndEmbedNever).flatMap {
               case Left(r) =>
