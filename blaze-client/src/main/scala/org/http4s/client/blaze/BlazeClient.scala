@@ -83,15 +83,15 @@ object BlazeClient {
           borrow.use { next =>
             idleTimeoutStage(next.connection).use { stageOpt =>
               println(s"The idle timeout stage is: $stageOpt")
-              val idleTimeoutF = stageOpt match {
-                case Some(stage) =>
-                  F.async[TimeoutException] { cb =>
-                    F.delay(stage.init(cb)).as(None)
-                  }
-                case None => F.never[TimeoutException]
-              }
+//              val idleTimeoutF = stageOpt match {
+//                case Some(stage) =>
+//                  F.async[TimeoutException] { cb =>
+//                    F.delay(stage.init(cb)).as(None)
+//                  }
+//                case None => F.never[TimeoutException]
+//              }
               val res = next.connection
-                .runRequest(req, idleTimeoutF)
+                .runRequest(req, F.never[TimeoutException])
                 .map { r =>
                   Resource.makeCase(F.pure(r)) {
                     case (_, ExitCase.Succeeded) =>
