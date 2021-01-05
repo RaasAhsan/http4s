@@ -91,7 +91,6 @@ object BlazeClient {
               }
               val res = next.connection
                 .runRequest(req, idleTimeoutF)
-//                .map(r => Resource.pure[F, Response[F]](r))
                 .map { r =>
                   Resource.makeCase(F.pure(r)) {
                     case (_, ExitCase.Succeeded) =>
@@ -102,15 +101,6 @@ object BlazeClient {
                         .guarantee(manager.invalidate(next.connection))
                   }
                 }
-//                .recoverWith { case Command.EOF =>
-//                  invalidate(next.connection).flatMap { _ =>
-//                    if (next.fresh)
-//                      F.raiseError(
-//                        new java.net.ConnectException(s"Failed to connect to endpoint: $key"))
-//                    else
-//                      loop
-//                  }
-//                }
 
               responseHeaderTimeout match {
                 case responseHeaderTimeout: FiniteDuration =>

@@ -305,7 +305,7 @@ object BlazeClientBuilder {
   def apply[F[_]: Async](executionContext: ExecutionContext): BlazeClientBuilder[F] =
     new BlazeClientBuilder[F](
       responseHeaderTimeout = Duration.Inf,
-      idleTimeout = 1.minute,
+      idleTimeout = Duration.Inf,
       requestTimeout = defaults.RequestTimeout,
       connectTimeout = defaults.ConnectTimeout,
       userAgent = Some(`User-Agent`(ProductId("http4s-blaze", Some(BuildInfo.version)))),
