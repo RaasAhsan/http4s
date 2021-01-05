@@ -26,7 +26,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import org.http4s.blaze.pipeline.LeafBuilder
 import org.http4s.blazecore.{QueueTestHead, SeqTestHead}
-import org.http4s.client.blaze.bits.DefaultUserAgent
+//import org.http4s.client.blaze.bits.DefaultUserAgent
 import org.http4s.headers.`User-Agent`
 //import org.typelevel.ci.CIString
 import scala.concurrent.duration._
@@ -196,15 +196,15 @@ class Http1ClientStageSuite extends Http4sSuite {
     }
   }
 
-  test("Insert a User-Agent header") {
-    val resp = "HTTP/1.1 200 OK\r\n\r\ndone"
-
-    getSubmission(FooRequest, resp, DefaultUserAgent).map { case (request, response) =>
-      val requestLines = request.split("\r\n").toList
-      assert(requestLines.contains(s"User-Agent: http4s-blaze/${BuildInfo.version}"))
-      assertEquals(response, "done")
-    }
-  }
+//  test("Insert a User-Agent header") {
+//    val resp = "HTTP/1.1 200 OK\r\n\r\ndone"
+//
+//    getSubmission(FooRequest, resp, DefaultUserAgent).map { case (request, response) =>
+//      val requestLines = request.split("\r\n").toList
+//      assert(requestLines.contains(s"User-Agent: http4s-blaze/${BuildInfo.version}"))
+//      assertEquals(response, "done")
+//    }
+//  }
 
 //  test("Use User-Agent header provided in Request") {
 //    val resp = "HTTP/1.1 200 OK\r\n\r\ndone"
