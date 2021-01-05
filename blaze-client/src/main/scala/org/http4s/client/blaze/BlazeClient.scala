@@ -43,51 +43,22 @@ object BlazeClient {
   )(implicit F: Async[F]) =
     Client[F] { req =>
       Resource.suspend {
-        val key = RequestKey.fromRequest(req)
-
-        def borrow: Resource[F, manager.NextConnection] =
-          Resource.eval(manager.borrow(key))
-
-        def loop: F[Resource[F, Response[F]]] =
-          borrow.use { next =>
-            next.connection
-              .runRequest(req, F.never[TimeoutException])
-              .map { r =>
-                Resource.makeCase(F.pure(r)) {
-                  case (_, ExitCase.Succeeded) =>
-                    manager.release(next.connection)
-                  case _ =>
-                    println(idleTimeout)
-                    println(responseHeaderTimeout)
-                    manager.invalidate(next.connection)
-                }
+        Resource.eval(manager.borrow(RequestKey.fromRequest(req))).use { next =>
+          next.connection
+            .runRequest(req, F.never[TimeoutException])
+            .map { r =>
+              Resource.makeCase(F.pure(r)) {
+                case (_, ExitCase.Succeeded) =>
+                  manager.release(next.connection)
+                case _ =>
+                  println(idleTimeout)
+                  println(responseHeaderTimeout)
+                  println(ec)
+                  println(requestTimeout)
+                  println(scheduler)
+                  manager.invalidate(next.connection)
               }
-          }
-
-        val res = loop
-        requestTimeout match {
-          case d: FiniteDuration =>
-            F.race(
-              res,
-              F.async[TimeoutException] { cb =>
-                F.delay {
-                  scheduler.schedule(
-                    new Runnable {
-                      def run() =
-                        cb(Right(new TimeoutException(
-                          s"Request to $key timed out after ${d.toMillis} ms")))
-                    },
-                    ec,
-                    d
-                  )
-                }.map(c => Some(F.delay(c.cancel())))
-              }
-            ).flatMap[Resource[F, Response[F]]] {
-              case Left(r) => F.pure(r)
-              case Right(t) => F.raiseError(t)
             }
-          case _ =>
-            res
         }
       }
     }
