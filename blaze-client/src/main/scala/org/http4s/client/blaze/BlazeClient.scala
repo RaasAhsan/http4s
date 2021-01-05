@@ -43,7 +43,7 @@ object BlazeClient {
   )(implicit F: Async[F]) =
     Client[F] { req =>
       Resource.suspend {
-        Resource.eval(manager.borrow(RequestKey.fromRequest(req))).use { next =>
+        manager.borrow(RequestKey.fromRequest(req)).flatMap { next =>
           next.connection
             .runRequest(req, F.never[TimeoutException])
             .map { r =>
