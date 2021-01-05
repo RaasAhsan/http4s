@@ -19,13 +19,10 @@ package client
 package blaze
 
 import cats.effect.kernel.{Async, Resource}
-import cats.effect.implicits._
 import cats.syntax.all._
-import java.nio.ByteBuffer
 import java.util.concurrent.TimeoutException
 //import org.http4s.blaze.pipeline.Command
 import org.http4s.blaze.util.TickWheelExecutor
-import org.http4s.blazecore.ResponseHeaderTimeoutStage
 //import org.log4s.getLogger
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -81,14 +78,7 @@ object BlazeClient {
 
         def loop: F[Resource[F, Response[F]]] =
           borrow.use { next =>
-//              val idleTimeoutF = stageOpt match {
-//                case Some(stage) =>
-//                  F.async[TimeoutException] { cb =>
-//                    F.delay(stage.init(cb)).as(None)
-//                  }
-//                case None => F.never[TimeoutException]
-//              }
-            val res = next.connection
+            next.connection
               .runRequest(req, F.never[TimeoutException])
               .map { r =>
                 Resource.makeCase(F.pure(r)) {
@@ -96,36 +86,10 @@ object BlazeClient {
                     manager.release(next.connection)
                   case _ =>
                     println(idleTimeout)
+                    println(responseHeaderTimeout)
                     manager.invalidate(next.connection)
                 }
               }
-
-            responseHeaderTimeout match {
-              case responseHeaderTimeout: FiniteDuration =>
-                F.deferred[Unit].flatMap { gate =>
-                  val responseHeaderTimeoutF: F[TimeoutException] =
-                    F.delay {
-                      val stage =
-                        new ResponseHeaderTimeoutStage[ByteBuffer](
-                          responseHeaderTimeout,
-                          scheduler,
-                          ec)
-                      next.connection.spliceBefore(stage)
-                      stage
-                    }.bracket { stage =>
-                      F.async[TimeoutException] { cb =>
-                        F.delay(stage.init(cb)) >> gate.complete(()).as(None)
-                      }
-                    }(stage => F.delay(stage.removeStage()))
-
-                  F.race(gate.get *> res, responseHeaderTimeoutF)
-                    .flatMap[Resource[F, Response[F]]] {
-                      case Left(r) => F.pure(r)
-                      case Right(t) => F.raiseError(t)
-                    }
-                }
-              case _ => res
-            }
           }
 
         val res = loop
